@@ -1,0 +1,9 @@
+version: "3.7"
+services:
+  app:
+    image: golang
+    tty: true
+    container_name: scrocrix-data-structures
+    working_dir: /etc/scrocrix-data-structures
+    volumes:
+      - ./:/etc/scrocrix-data-structures
