@@ -1,5 +1,12 @@
 package hash_table
 
+import (
+	"errors"
+	"sort"
+)
+
+var ErrNoSuchKeyFound = errors.New("error: no such key was found")
+
 // HashTable is a data structure which is divided into three parts: Key, Hash Function and the Bucket.
 //
 // The advantage of using Hash Tables is the ability to deal with large arbitrary data sets in O(1) time.
@@ -17,11 +24,35 @@ func (ht *HashTable) hash(key int) int {
 func (ht *HashTable) Insert(key int) bool {
 	hv := ht.hash(key)
 
-	if len(ht.Bucket[hv]) > 0 {
-		ht.Bucket[hv] = append(ht.Bucket[hv], key)
-	} else {
-		ht.Bucket[hv] = append(ht.Bucket[hv], key)
-	}
+	ht.Bucket[hv] = append(ht.Bucket[hv], key)
+
+	sort.Ints(ht.Bucket[hv])
 
 	return true
+}
+
+// Search is responsible for finding the element in the Hash Table.
+func (ht *HashTable) Search(key int) (int, error) {
+	ll := ht.Bucket[ht.hash(key)]
+
+	l := 0
+	r := len(ll) - 1
+
+	for l <= r {
+		target := l + r/2
+
+		if ll[target] == key {
+			return ll[target], nil
+		}
+
+		if ll[target] < key {
+			l = target + 1
+		}
+
+		if ll[target] > key {
+			r = target - 1
+		}
+	}
+
+	return -1, ErrNoSuchKeyFound
 }
