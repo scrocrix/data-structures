@@ -20,6 +20,52 @@ func (ht *HashTable) hash(key int) int {
 	return key % 7
 }
 
+// search performs a binary search in the linked list.
+//
+// It receives an argument which is a high-order function to manipulate custom scenarios.
+func (ht *HashTable) search(key int, ll []int, isFound func(target int) int) int {
+	l := 0
+	r := len(ll) - 1
+
+	for l <= r {
+		target := l + r/2
+
+		if ll[target] == key {
+			return isFound(target)
+		}
+
+		if ll[target] < key {
+			l = target + 1
+		}
+
+		if ll[target] > key {
+			r = target - 1
+		}
+	}
+
+	return -1
+}
+
+// Delete is responsible for searching the key and deleting it once it exists.
+func (ht *HashTable) Delete(key int) error {
+	hv := ht.hash(key)
+	ll := ht.Bucket[hv]
+
+	ht.search(key, ll, func(target int) int {
+		// we delete the item from the linked list
+		ht.Bucket[hv] = append(ht.Bucket[hv][:target], ht.Bucket[hv][target+1:]...)
+
+		// we delete the index reference from the hash table, if the linked list has no items left
+		if len(ht.Bucket[ht.hash(key)]) == 0 {
+			delete(ht.Bucket, hv)
+		}
+
+		return key
+	})
+
+	return nil
+}
+
 // Insert is responsible for storing the input key value into the Hash Table's data bucket.
 func (ht *HashTable) Insert(key int) bool {
 	hv := ht.hash(key)
@@ -35,24 +81,13 @@ func (ht *HashTable) Insert(key int) bool {
 func (ht *HashTable) Search(key int) (int, error) {
 	ll := ht.Bucket[ht.hash(key)]
 
-	l := 0
-	r := len(ll) - 1
+	n := ht.search(key, ll, func(target int) int {
+		return key
+	})
 
-	for l <= r {
-		target := l + r/2
-
-		if ll[target] == key {
-			return ll[target], nil
-		}
-
-		if ll[target] < key {
-			l = target + 1
-		}
-
-		if ll[target] > key {
-			r = target - 1
-		}
+	if n == -1 {
+		return n, ErrNoSuchKeyFound
 	}
 
-	return -1, ErrNoSuchKeyFound
+	return n, nil
 }

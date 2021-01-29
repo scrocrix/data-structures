@@ -11,6 +11,46 @@ type hashTableTest struct {
 	suite.Suite
 }
 
+func (unit *hashTableTest) TestDelete() {
+	unit.Run("Delete a single item from the linked list in the hash table", func() {
+		sut := hash_table.HashTable{
+			Bucket: map[int][]int{},
+		}
+
+		require.True(unit.T(), sut.Insert(50))
+		require.True(unit.T(), sut.Insert(85))
+
+		require.NotEmpty(unit.T(), sut.Bucket)
+		require.Equal(unit.T(), 1, len(sut.Bucket))
+		require.Equal(unit.T(), 2, len(sut.Bucket[1]))
+
+		err := sut.Delete(50)
+
+		require.Nil(unit.T(), err)
+
+		require.Equal(unit.T(), 1, len(sut.Bucket))
+		require.Equal(unit.T(), 1, len(sut.Bucket[1]))
+	})
+
+	unit.Run("Delete the hash table index when linked list is empty", func() {
+		sut := hash_table.HashTable{
+			Bucket: map[int][]int{},
+		}
+
+		require.True(unit.T(), sut.Insert(50))
+
+		require.NotEmpty(unit.T(), sut.Bucket)
+		require.Equal(unit.T(), 1, len(sut.Bucket))
+		require.Equal(unit.T(), 1, len(sut.Bucket[1]))
+
+		err := sut.Delete(50)
+
+		require.Nil(unit.T(), err)
+
+		require.Equal(unit.T(), 0, len(sut.Bucket))
+	})
+}
+
 func (unit *hashTableTest) TestInsert() {
 	unit.Run("Return True When Successful", func() {
 		sut := hash_table.HashTable{
